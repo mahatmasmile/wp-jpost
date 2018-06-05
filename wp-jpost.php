@@ -295,6 +295,30 @@ function jpost_setopt() {
                     </table>
                 </div>
             </div>
+			
+            <div class="postbox">
+                <button type="button" class="handlediv" aria-expanded="true"><span class="screen-reader-text">定时</span>
+                <span class="toggle-indicator" aria-hidden="true"></span></button>
+                <h2 class="hndle ui-sortable-handle"><span>定时</span></h2>   
+                <div class="inside">
+                    <table>    
+                        <tr>
+                            <td class="d_tit">间隔(秒)[<a href="<?php echo $wp_jpost_jplugin_url;?>#readme">?</a>]</td>
+                            <td>
+                                <input class="ipt-b" type="text" id="j_timer_interval" name="j_timer_interval" value="<?php echo wp_jpost_jopt('j_timer_interval',true); ?>">
+                            </td>
+                        </tr>     
+                        <tr>
+                            <td class="d_tit">每天运行时间
+							<br/>(* 1,2,3,4 #每小时 1,2,3,4分钟)
+							<br/>(1:01,1:02,1:03,1:04 #每天 1点1,2,3,4分钟)[<a href="<?php echo $wp_jpost_jplugin_url;?>#readme">?</a>]</td>
+                            <td>
+                                <input class="ipt-b" type="text" id="j_timer_exp" name="j_timer_exp" value="<?php echo wp_jpost_jopt('j_timer_exp',true); ?>">
+                            </td>
+                        </tr>  
+                    </table>
+                </div>
+            </div>
 
             <div class="postbox">
                 <button type="button" class="handlediv" aria-expanded="true"><span class="screen-reader-text">其他设置</span>

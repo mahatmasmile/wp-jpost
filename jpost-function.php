@@ -23,6 +23,8 @@ $wp_jpost_options = array(
     "j_params",
     "j_single_page_other_elmt",
     "j_single_page_other_fetch",
+	"j_timer_interval",
+    "j_timer_exp",
 );
 $wp_jpost_jplugin_url = 'https://www.jiloc.com/43412.html';
 

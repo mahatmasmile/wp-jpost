@@ -54,11 +54,53 @@ if(  false === $tt ){
         exit;
     }
     if( $cPage <= 0 ){
+		//$Loop=true;//计算下次执行时间
+		$nextTimeout=6*3600*1000;//默认为6小时
+		$curTime=time();
+		if(isset($j_timer_interval) && $j_timer_interval ){
+			$nextTimeout=$j_timer_interval;
+		}else if(isset($j_timer_exp) && $j_timer_exp ){
+			list($nexthour,$nextminute)=str_split($j_timer_exp,' ');
+			if($nexthour && $nexthour!='*'){
+				$nextHourArr=str_split($j_timer_exp,',');
+				$nextTimeArr=array();
+				foreach( $nextHourArr as $item){
+					$nextTimeArr[]=strtotime(date("Y-m-d $item:i:s"));
+				}
+				$nextTimeArr[]=$nextTimeArr[0]+3600*24;
+				foreach( $nextTimeArr as $item){
+					if($item>$curTime+10){
+						$nextTimeout=$item-$curTime*1000;
+						break;
+					}
+				}
+				
+			}else{
+				$nextMinArr=str_split($j_timer_exp,',');
+				$nextTimeArr=array();
+				foreach( $nextMinArr as $item){
+					$nextTimeArr[]=strtotime(date("Y-m-d H:$item:s"));
+				}
+				$nextTimeArr[]=$nextTimeArr[0]+3600;
+				foreach( $nextTimeArr as $item){
+					if($item>$curTime+10){
+						$nextTimeout=$item-$curTime*1000;
+						break;
+					}
+				}
+				
+			}
+		}
+		$nextTime=date('Y`m`d`H`i',time()+$nextTimeout/1000);
         if( $Loop ){
             echo 'List Finished. '.date('Y-m-d H:i:s',time()).$enter ;
-            wp_jpost_g( $_SERVER['SCRIPT_NAME']."?page=1",'512000' );
-            die('Ready to Begin next Loop.');
-        }else{  wp_cache_flush();   die( "List Finished 采集结束. ");}
+            wp_jpost_g( $_SERVER['SCRIPT_NAME']."?page=1",'$nextTimeout' );
+            die('List Finished 采集结束.Ready to Begin next Loop.. 下次启动时间：$$nextTime ');
+        }else{  
+			wp_cache_flush();  
+			wp_jpost_g( $_SERVER['SCRIPT_NAME']."?page=1",'$nextTimeout' );
+			die( "List Finished 采集结束. 下次启动时间：$$nextTime ");
+		}
     }
     // 抓取单页链接
     $jSingleList = '';
