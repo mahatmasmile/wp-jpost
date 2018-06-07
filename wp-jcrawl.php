@@ -91,15 +91,15 @@ if(  false === $tt ){
 				
 			}
 		}
-		$nextTime=date('Y`m`d`H`i',time()+$nextTimeout/1000);
+		$nextTime=date('Y-m-d`H:i',time()+$nextTimeout/1000);
         if( $Loop ){
             echo 'List Finished. '.date('Y-m-d H:i:s',time()).$enter ;
-            wp_jpost_g( $_SERVER['SCRIPT_NAME']."?page=1",'$nextTimeout' );
-            die('List Finished 采集结束.Ready to Begin next Loop.. 下次启动时间：$$nextTime ');
+            wp_jpost_g( $_SERVER['SCRIPT_NAME']."?page=1","$nextTimeout" );
+            die('List Finished 采集结束.Ready to Begin next Loop.. 下次启动时间：$nextTime ');
         }else{  
 			wp_cache_flush();  
-			wp_jpost_g( $_SERVER['SCRIPT_NAME']."?page=1",'$nextTimeout' );
-			die( "List Finished 采集结束. 下次启动时间：$$nextTime ");
+			wp_jpost_g( $_SERVER['SCRIPT_NAME']."?page=1","$nextTimeout" );
+			die( "List Finished 采集结束. 下次启动时间：$nextTime ");
 		}
     }
     // 抓取单页链接
@@ -242,10 +242,50 @@ if( is_array($j_search_array)){//替换内容
     $post_content = str_replace($j_search_array,$j_replace_array,$post_content);
 	$post_date = str_replace($j_search_array,$j_replace_array,$post_date);
 }
-$post_date = trim($post_date);
-if(!$post_date){
-	$post_date=date("Y-m-d H:i:s",time());
+//匹配日期
+function post_date_matchparse($post_date){
+	$post_date = trim($post_date);
+	$patten = "/^\d{4}[\-](0?[1-9]|1[012])[\-](0?[1-9]|[12][0-9]|3[01])(\s+(0?[0-9]|1[0-9]|2[0-3])\:(0?[0-9]|[1-5][0-9])\:(0?[0-9]|[1-5][0-9]))?$/";
+	if ($post_date && preg_match($patten, $post_date)){
+		
+	}else if($post_date && strlen($post_date)>20){
+		$patten = "/\d{4}[\-](0?[1-9]|1[012])[\-](0?[1-9]|[12][0-9]|3[01])(\s+(0?[0-9]|1[0-9]|2[0-3])\:(0?[0-9]|[1-5][0-9])\:(0?[0-9]|[1-5][0-9]))?/";
+		if(preg_match($patten, $post_date)){
+			preg_match_all($patten,$post_date, $t_date);
+			$post_date=$t_date[0][0];
+		}else{
+			$patten = "/(\d{4})(年|\\-|\\/)/";
+			preg_match_all($patten,$post_date, $t_year);
+			$t_year=$t_year[1][0];
+			$patten = "/(\d{1,2})(月|\\-|\\/)/";
+			preg_match_all($patten,$post_date, $t_month);
+			$t_month=$t_month[1][0];
+			$patten = "/(月|\\-|\\/)(\d{1,2})(日?)/";
+			preg_match_all($patten,$post_date, $t_day);
+			$t_day=$t_day[2][0];
+			
+			$patten = "/\d{1,2}\\:\d{1,2}(\\:\d{1,2})?/";
+			preg_match_all($patten,$post_date, $t_time);
+			$t_time=$t_time[0][0];
+			if($t_time){
+				$t_time=" $t_time";
+			}else{
+				$t_time="";
+			}
+			$post_date="$t_year-$t_month-$t_day$t_time";
+		}
+		//die(json_encode($t_year[1][0],true));
+	}
+
+	if($post_date){
+		$post_date=date("Y-m-d H:i:s",strtotime($post_date));
+	}
+	if(!$post_date){
+		$post_date=date("Y-m-d H:i:s",time());
+	}
+	return $post_date;
 }
+$post_date=post_date_matchparse($post_date);
 
 if( $j_random_tags ){   //随机插入关键词
     $post_content = randomInsert($post_content , explode(',', $j_random_tags));
@@ -304,6 +344,7 @@ if( $post_title && $post_content ){//检查内容
                 unset( $e );   
                 kses_remove_filters(); //停止过滤字符
                 $post_ID = wp_insert_post( $my_post);
+				//die("id $post_ID".json_encode($my_post,true));
                 kses_init_filters();
         }
         if( $debug ){

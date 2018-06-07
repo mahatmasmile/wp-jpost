@@ -79,7 +79,7 @@ function wp_jpost_char2UTF8($str){
 
 
 
-function wp_jpost_g($url,$time='8000'){
+function wp_jpost_g($url,$time='3000'){
     global $debug;
     if ( $debug ){
         return ;
